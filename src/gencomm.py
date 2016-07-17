@@ -30,8 +30,13 @@ class GenCommClient(object):
         return self.read_register(1, 0) == self.address
 
     def read_register(self, page, address, scale=1, bits=16, signed=False):
+        # This is the mess.
         self.log.debug("Reading page: %s, address: %s", page, address)
+        # Give the poor controller some time to think. It doesn't like being rushed.
         sleep(0.1)
+        # Unfortunately the controller I have has a habit of returning
+        # the previous value when reading a register. So we'll read every
+        # register at least twice.
         try:
             self._read_register(page, address, scale, bits, signed)
         except SlaveDeviceBusyError:
@@ -40,6 +45,8 @@ class GenCommClient(object):
         except (ValueError, IOError) as e:
             self.log.debug("Error in read: %s", e)
 
+        # Likewise when actually reading the value it has a habit of refusing
+        # to answer, with a variety of exciting errors. So, retry up to 5 times.
         retry_count = 5
         while retry_count > 0:
             try:
@@ -52,6 +59,9 @@ class GenCommClient(object):
                 self.log.debug("Error in read: %s", e)
             retry_count -= 1
             sleep((5 - retry_count) * 0.1)
+
+        # Sometimes things do still fail, especially when the controller is up to stuff.
+        # Throw an exception, the caller should probably wait for 5-10 seconds and start again.
         raise GenCommError("Read failed.")
 
     def _read_register(self, page, address, scale, bits, signed):
