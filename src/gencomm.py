@@ -46,7 +46,9 @@ class GenCommClient(object):
             self.log.debug("Error in read: %s", e)
 
         # Likewise when actually reading the value it has a habit of refusing
-        # to answer, with a variety of exciting errors. So, retry up to 5 times.
+        # to answer, with a variety of exciting errors. Sometimes it'll even
+        # start replying before we finished asking. (Good luck debugging that
+        # without a logic analyzer.) So, retry up to 5 times.
         retry_count = 5
         while retry_count > 0:
             try:
@@ -60,7 +62,8 @@ class GenCommClient(object):
             retry_count -= 1
             sleep((5 - retry_count) * 0.1)
 
-        # Sometimes things do still fail, especially when the controller is up to stuff.
+        # Sometimes things do still fail, especially when the controller is doing important
+        # things like contemplating why it isn't actually attached to a generator.
         # Throw an exception, the caller should probably wait for 5-10 seconds and start again.
         raise GenCommError("Read failed.")
 
