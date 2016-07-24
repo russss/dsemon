@@ -35,8 +35,8 @@ class GenCommClient(object):
         # Give the poor controller some time to think. It doesn't like being rushed.
         sleep(0.1)
         # Unfortunately the controller I have has a habit of returning
-        # the previous value when reading a register. So we'll read every
-        # register at least twice.
+        # the previous value when reading a register. Issue a dummy read to make
+        # sure we don't end up with the previous value.
         try:
             self._read_register(page, address, scale, bits, signed)
         except SlaveDeviceBusyError:
@@ -68,6 +68,10 @@ class GenCommClient(object):
         raise GenCommError("Read failed.")
 
     def _read_register(self, page, address, scale, bits, signed):
+        """ Issue a register read and pray it succeeds. This also converts
+            sentinel (error) values if they are present and the register is
+            on a page which uses them. """
+
         coil = (page * 256) + address
         if bits == 16:
             value = self.instrument.read_register(coil, signed=signed)
