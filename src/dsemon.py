@@ -53,7 +53,7 @@ class DSEMon(object):
             return f.readline().split(' ')[0]
 
     def save_data(self, control_mode, basic, derived, alarms):
-        gentag = 'generator=test'
+        gentag = 'generator=1'
         with open('/var/lib/dsemon.log', 'a') as f:
             f.write(self.metric_line('control_mode', control_mode))
             for m in [basic, derived]:
@@ -72,7 +72,7 @@ class DSEMon(object):
                 yield self.metric_line(key, value)
 
     def metric_line(self, name, value):
-        return "%s,%s value=%s %s\n" % (name, 'generator=test', value, int(time()))
+        return "%s,%s value=%s %s\n" % (name, 'generator=1', value, int(time()))
 
 
 

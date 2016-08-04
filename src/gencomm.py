@@ -24,7 +24,7 @@ class GenCommClient(object):
     def connect(self):
         self.instrument = minimalmodbus.Instrument(self.port, self.address)
         #self.instrument.debug = True
-        self.instrument.serial.stopbits = 2
+        #self.instrument.serial.stopbits = 2
 
     def test(self):
         return self.read_register(1, 0) == self.address
@@ -65,7 +65,7 @@ class GenCommClient(object):
         # Sometimes things do still fail, especially when the controller is doing important
         # things like contemplating why it isn't actually attached to a generator.
         # Throw an exception, the caller should probably wait for 5-10 seconds and start again.
-        raise GenCommError("Read failed.")
+        return None
 
     def _read_register(self, page, address, scale, bits, signed):
         """ Issue a register read and pray it succeeds. This also converts
