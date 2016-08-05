@@ -1,6 +1,7 @@
 from __future__ import division, absolute_import, print_function, unicode_literals
 from time import sleep, time
 import logging
+import ConfigParser
 
 from gencomm import GenCommClient, GenCommError
 from sentinel import Sentinel
@@ -10,6 +11,8 @@ from constants import control_modes
 class DSEMon(object):
     def __init__(self):
         self.log = logging.getLogger(__name__)
+        self.config = ConfigParser.ConfigParser()
+        self.config.read(['/etc/dsemon.conf'])
 
     def run(self):
         while True:
@@ -53,7 +56,6 @@ class DSEMon(object):
             return f.readline().split(' ')[0]
 
     def save_data(self, control_mode, basic, derived, alarms):
-        gentag = 'generator=1'
         with open('/var/lib/dsemon.log', 'a') as f:
             f.write(self.metric_line('control_mode', control_mode))
             for m in [basic, derived]:
@@ -72,7 +74,8 @@ class DSEMon(object):
                 yield self.metric_line(key, value)
 
     def metric_line(self, name, value):
-        return "%s,%s value=%s %s\n" % (name, 'generator=1', value, int(time()))
+        gentag = 'generator=%s' % (self.config.get('dsemon', 'id'))
+        return "%s,%s value=%s %s\n" % (name, gentag, value, int(time()))
 
 
 
