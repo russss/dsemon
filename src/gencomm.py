@@ -115,6 +115,7 @@ class GenCommClient(object):
                 'battery_voltage': self.read_register(4, 5, scale=0.1),
                 'engine_speed': self.read_register(4, 6),
                 'frequency': self.read_register(4, 7, scale=0.1),
+                'fuel_consumption': self.read_register(5, 10, bits=32, scale=0.01),
                 'l_n_voltage': (self.read_register(4, 8, bits=32, scale=0.1),
                                 self.read_register(4, 10, bits=32, scale=0.1),
                                 self.read_register(4, 12, bits=32, scale=0.1)),
